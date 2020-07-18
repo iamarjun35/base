@@ -1,8 +1,8 @@
 //
-//  ViewController.swift
-//  UpdatedAlamofire
+//  GoToVC.swift
+//  MoyaDemo
 //
-//  Created by IOS on 16/07/20.
+//  Created by IOS on 14/07/20.
 //  Copyright © 2020 iOS. All rights reserved.
 //
 
@@ -10,20 +10,21 @@ import UIKit
 import SwiftyJSON
 import ObjectMapper
 
-class ViewController: UIViewController {
+
+class GoToVC: UIViewController {
     
-    var arrVehicle = [GetVehicleMakeData]()
-    
+    var arrModels = [GetVehicleModelData]()
+    var makeID = String()
     
     @IBOutlet weak var tblViw: UITableView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        webServices(KEmptyParams, API.getVehicleMake, API.getVehicleMake)
+
+        let params = ["make_id":makeID]
+        webServices(params, API.getVehicleModelByMakeId, API.getVehicleModelByMakeId)
     }
     
-    //MARK: - WEB SERVICES
     func webServices(_ parameter: [String:Any],_ apiURL: String,_ type: String){
         self.showHudd()
         sharedInstance.dataTaskPostMapper(controller: self,request: apiURL,isHeaderRequired:true, params: parameter, completion: {
@@ -34,10 +35,10 @@ class ViewController: UIViewController {
             let msg = json["message"].stringValue
             print("\(apiURL) response: \(json)")
             if code == 200{
-                let responseModel = Mapper<GetVehicleMakeBase>().map(JSONObject: result)
+                let responseModel = Mapper<GetVehicleModelBase>().map(JSONObject: result)
                 if let data = responseModel?.data{
-                    self.arrVehicle.removeAll()
-                    self.arrVehicle = data
+                    self.arrModels.removeAll()
+                    self.arrModels = data
                     self.tblViw.reloadData()
                 }
             }
@@ -46,29 +47,25 @@ class ViewController: UIViewController {
             }
         })
     }
-
+    
 
 }
 
-extension ViewController:UITableViewDelegate,UITableViewDataSource{
+extension GoToVC:UITableViewDelegate,UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return arrVehicle.count
+        return arrModels.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell")
         
-        cell?.textLabel?.text = arrVehicle[indexPath.row].make_name
+        cell?.textLabel?.text = arrModels[indexPath.row].model_name
         
         return cell!
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let nextVC = self.storyboard?.instantiateViewController(withIdentifier: "GoToVC") as! GoToVC
-        nextVC.makeID = arrVehicle[indexPath.row].make_id ?? ""
-        navigationController?.pushViewController(nextVC, animated: true)
+        print(arrModels[indexPath.row].model_id ?? "")
     }
         
 }
-
-
